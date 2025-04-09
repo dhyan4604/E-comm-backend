@@ -1,13 +1,13 @@
 const express = require("express");
 const Order = require("../models/Order");
-const User = require("../models/User"); // Assuming you have this
+const User = require("../models/User"); 
 const { authMiddleware, adminMiddleware, userMiddleware } = require("../middleware/auth");
 const nodemailer = require("nodemailer");
 const pdf = require("html-pdf");
 
 const router = express.Router();
 
-// Utility: Generate Invoice HTML
+
 function generateInvoiceHtml(order) {
   return `
     <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; border: 1px solid #eee;">
