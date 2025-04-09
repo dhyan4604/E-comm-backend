@@ -10,45 +10,59 @@ const router = express.Router();
 
 function generateInvoiceHtml(order) {
   return `
-    <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; border: 1px solid #eee;">
-      <h2 style="text-align: center; color: #333;">🧾 AudioLoom Order Invoice</h2>
-      <p><strong>Order ID:</strong> ${order._id}</p>
-      <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 700px; margin: auto; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); background: #fff; border: 1px solid #ccc;">
+      <div style="text-align: center; background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%); padding: 20px; color: white; border-radius: 10px 10px 0 0;">
+        <h1 style="margin: 0;">🧾 AudioLoom</h1>
+        <h3 style="margin-top: 5px;">Order Invoice</h3>
+      </div>
 
-      <h3 style="color: #555; border-bottom: 1px solid #ccc;">Items:</h3>
-      <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-          <tr style="background-color: #f5f5f5;">
-            <th style="padding: 8px; border: 1px solid #ddd;">Product</th>
-            <th style="padding: 8px; border: 1px solid #ddd;">Qty</th>
-            <th style="padding: 8px; border: 1px solid #ddd;">Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${order.items
-            .map(
-              (item) => `
-              <tr>
-                <td style="padding: 8px; border: 1px solid #ddd;">${item.name}</td>
-                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${item.quantity}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">₹${item.price}</td>
-              </tr>
-            `
-            )
-            .join("")}
-        </tbody>
-      </table>
+      <div style="padding: 20px;">
+        <p><strong>Order ID:</strong> ${order._id}</p>
+        <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
 
-      <h3 style="text-align: right; margin-top: 20px;">Total: ₹${order.totalPrice}</h3>
+        <h3 style="color: #333; margin-top: 30px;">🛒 Items</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr style="background-color: #f0f0f0; color: #444;">
+              <th style="padding: 12px; border: 1px solid #ddd;">Product</th>
+              <th style="padding: 12px; border: 1px solid #ddd;">Qty</th>
+              <th style="padding: 12px; border: 1px solid #ddd;">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order.items
+              .map(
+                (item, i) => `
+                <tr style="background-color: ${i % 2 === 0 ? "#fafafa" : "#fefefe"};">
+                  <td style="padding: 10px; border: 1px solid #eee;">${item.name}</td>
+                  <td style="padding: 10px; border: 1px solid #eee; text-align: center;">${item.quantity}</td>
+                  <td style="padding: 10px; border: 1px solid #eee;">₹${item.price}</td>
+                </tr>
+              `
+              )
+              .join("")}
+          </tbody>
+        </table>
 
-      <p><strong>Shipping Address:</strong> ${order.address}</p>
-      <p><strong>Phone:</strong> ${order.phone}</p>
-      <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
+        <div style="text-align: right; margin-top: 20px;">
+          <h3 style="color: #444;">Total: <span style="color: #2575fc;">₹${order.totalPrice}</span></h3>
+        </div>
 
-      <p style="text-align: center; margin-top: 30px; font-style: italic;">Thank you for shopping with AudioLoom!</p>
+        <div style="margin-top: 30px;">
+          <h3 style="color: #333;">📦 Shipping Details</h3>
+          <p><strong>Address:</strong> ${order.address}</p>
+          <p><strong>Phone:</strong> ${order.phone}</p>
+          <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
+        </div>
+
+        <p style="text-align: center; margin-top: 40px; color: #777; font-style: italic;">
+          Thank you for shopping with <strong>AudioLoom</strong>! 🎶<br>
+          Visit us again for more premium audio products.
+        </p>
+      </div>
     </div>
   `;
-};
+}
 
 const transporter = nodemailer.createTransport({
     service: "Gmail",
@@ -166,6 +180,16 @@ router.put("/update-status/:orderId", async (req, res) => {
     console.error("Error updating order status:", error);
     res.status(500).json({ message: "Internal server error" });
   }
+});
+
+router.put("/orders/:id/cancel", authMiddleware, async (req, res) => {
+  const order = await Order.findById(req.params.id);
+  if (!order) return res.status(404).json({ message: "Order not found" });
+
+  order.status = "Cancelled";
+  await order.save();
+
+  res.json({ message: "Order cancelled successfully" });
 });
 
 module.exports = router;
