@@ -11,6 +11,9 @@ const userRoutes = require("./routes/userRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const productRoutes = require("./routes/productRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const { sendOrderConfirmation } = require("./utils/sendOrderConfirmation");
+const dashboardRoutes = require("./routes/dashboard");
+
 
 
 const app = express();
@@ -36,6 +39,8 @@ app.use("/api", userRoutes);
 app.use("/api", orderRoutes);
 app.use("/api", productRoutes);
 app.use("/api", adminRoutes);
+app.use("/api", dashboardRoutes);
+
 
 
 // Start Server
